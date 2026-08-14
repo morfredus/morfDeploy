@@ -1,0 +1,19 @@
+# Dossiers du workflow local morfSystem (jamais versionnés)
+.git/
+.vscode/
+.vs/
+.agents/
+.claude/
+.codex/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Secrets
+.env
+secrets.json
