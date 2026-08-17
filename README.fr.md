@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.1.1-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.0-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -37,14 +37,73 @@ partout ; seul le backend change.
 sudo ./service.py install      # compile si besoin, installe, démarre
 sudo ./service.py update       # recompile, remplace le binaire, redémarre
 sudo ./service.py uninstall    # désinscrit, en conservant la configuration
+sudo ./service.py purge <id>…  # efface des catégories de données (voir plus bas)
 ./service.py status            # ce que le système en dit
 ```
+
+## Purge des données
+
+Un projet peut déclarer, dans son `service.json`, les catégories de données qu'il
+sait effacer. Les identifiants sont **libres** - un projet annonce `database`,
+`cache`, `history`, `thumbnails` ou autre chose sans que morfdeploy change - et
+chacune porte un **label humain** et un drapeau **`destructive`**.
+
+```jsonc
+"purge": [
+  { "id": "cache",    "label": "Miniatures et cache",
+    "type": "path", "base": "state", "paths": ["cache"] },
+  { "id": "database", "label": "Base d'indexation photo (irréversible)", "destructive": true,
+    "type": "path", "base": "state", "paths": ["morfphoto.db"] },
+  { "id": "history",  "label": "Historique analytics", "destructive": true,
+    "type": "command", "command": ["__BINARY__", "purge", "history"],
+    "dry_run": true }
+]
+```
+
+Deux natures de catégorie :
+
+- **`path`** - morfdeploy supprime des fichiers ou dossiers, résolus sous une base
+  (`state` / `config` / `app`). Un chemin qui s'échappe de sa base (`..`) est refusé.
+- **`command`** - morfdeploy confie l'effacement au propre point d'entrée du
+  projet, pour une donnée qu'un chemin ne peut pas exprimer (une partie d'une base
+  partagée). Jetons substitués : `__BINARY__`, `__STATE_DIR__`, `__CONFIG_DIR__`,
+  `__APP_DIR__`.
+
+Une catégorie `path` peut ajouter **`from_config`** pour une donnée que l'admin
+peut déplacer : elle nomme une clé de la config déployée dont la valeur, si elle
+est définie, devient la cible ; si la clé est absente ou vide, le `base`/`paths`
+par défaut s'applique. morfdeploy lit l'emplacement réel dans la config du service
+au lieu de le deviner.
+
+```jsonc
+{ "id": "vault", "label": "Coffre chiffré", "destructive": true, "type": "path",
+  "from_config": "vault_root", "base": "state", "paths": ["vault"] }
+```
+
+```sh
+sudo ./service.py purge cache database   # catégories nommées
+sudo ./service.py purge --all            # toutes les catégories déclarées
+./service.py purge --all --dry-run       # montre ce qui partirait, ne supprime rien
+```
+
+`--dry-run` parcourt le même chemin de résolution que l'exécution réelle ; seul
+l'acte final diffère. Une catégorie `command` n'est simulée que si le projet
+déclare que sa commande supporte `--dry-run` (`dry_run: true`) ; sinon la
+simulation ne lance **rien** et le signale, plutôt que de laisser croire qu'elle a
+agi. Les droits administrateur ne sont exigés que par la purge réelle, jamais par
+une simulation.
+
+Une purge réelle est **refusée tant que le service tourne** : effacer une base
+qu'il est peut-être en train d'écrire la corromprait. Arrêter le service d'abord,
+ou passer `--force` pour outrepasser le garde-fou. `uninstall` accepte aussi
+`--dry-run`, qui liste ce qu'il désinscrirait et (avec `--purge`) supprimerait,
+sans rien toucher.
 
 ## Organisation
 
 ```
 morfdeploy/
-├── cli.py            point d'entrée (install/update/uninstall/status/config)
+├── cli.py            point d'entrée (install/update/uninstall/purge/status/config)
 ├── core.py           le Deployer : les quatre étapes, indépendantes de la plateforme
 ├── manifest.py       lit et valide service.json
 ├── configmerge.py    complétion non destructive de la config (ajoute les clés manquantes, ne modifie jamais les valeurs)

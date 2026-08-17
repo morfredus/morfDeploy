@@ -2,7 +2,7 @@
 
 *Read in another language: **English** (this document) · [Français](README.fr.md).*
 
-[![Version](https://img.shields.io/badge/version-0.1.1-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.0-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -35,14 +35,69 @@ the backend changes.
 sudo ./service.py install      # build if needed, install, start
 sudo ./service.py update       # rebuild, replace the binary, restart
 sudo ./service.py uninstall    # deregister, keeping the configuration
+sudo ./service.py purge <id>…  # erase declared data categories (see below)
 ./service.py status            # what the system says about it
 ```
+
+## Purging data
+
+A project may declare, in `service.json`, the categories of data it knows how to
+erase. The identifiers are free - a project announces `database`, `cache`,
+`history`, `thumbnails` or anything else without morfdeploy changing - and each
+carries a human label and a `destructive` flag.
+
+```jsonc
+"purge": [
+  { "id": "cache",    "label": "Thumbnails and cache",
+    "type": "path", "base": "state", "paths": ["cache"] },
+  { "id": "database", "label": "Photo index (irreversible)", "destructive": true,
+    "type": "path", "base": "state", "paths": ["morfphoto.db"] },
+  { "id": "history",  "label": "Analytics history", "destructive": true,
+    "type": "command", "command": ["__BINARY__", "purge", "history"],
+    "dry_run": true }
+]
+```
+
+Two kinds of category:
+
+- **`path`** - morfdeploy removes files or directories, resolved under a base
+  (`state` / `config` / `app`). A path that escapes its base (`..`) is refused.
+- **`command`** - morfdeploy hands the erasure to the project's own entry point,
+  for data a path cannot express (part of a shared database, say). Placeholders
+  `__BINARY__`, `__STATE_DIR__`, `__CONFIG_DIR__`, `__APP_DIR__` are substituted.
+
+A `path` category may add **`from_config`** for data the admin can relocate: it
+names a key in the deployed config whose value, when set, becomes the target;
+when the key is absent or empty, the default `base`/`paths` applies. morfdeploy
+reads the real location from the service's own config rather than guessing it.
+
+```jsonc
+{ "id": "vault", "label": "Encrypted vault", "destructive": true, "type": "path",
+  "from_config": "vault_root", "base": "state", "paths": ["vault"] }
+```
+
+```sh
+sudo ./service.py purge cache database   # named categories
+sudo ./service.py purge --all            # every declared category
+./service.py purge --all --dry-run       # show what would go, remove nothing
+```
+
+`--dry-run` walks the same resolution path as the real run; only the final act
+differs. A `command` category is simulated only if the project says its command
+honours `--dry-run` (`dry_run: true`); otherwise the dry run reports that the
+category cannot be simulated rather than pretending it ran. Administrator rights
+are required by the real purge, never by a dry run.
+
+A real purge is **refused while the service is running** -- erasing a database it
+may be mid-write to would corrupt it. Stop the service first, or pass `--force`
+to override the guard. `uninstall` also takes `--dry-run`, listing what it would
+deregister and (with `--purge`) remove, without touching anything.
 
 ## Layout
 
 ```
 morfdeploy/
-├── cli.py            command-line entry point (install/update/uninstall/status/config)
+├── cli.py            command-line entry point (install/update/uninstall/purge/status/config)
 ├── core.py           the Deployer: the four steps, platform-agnostic
 ├── manifest.py       reads and validates service.json
 ├── configmerge.py    non-destructive config completion (adds missing keys, never edits values)
