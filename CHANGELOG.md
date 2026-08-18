@@ -3,6 +3,43 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.0] - 2026-08-18
+
+### Ajouté
+
+- **Contrat `build_dependencies` : les bibliothèques nécessaires à la
+  COMPILATION**, distinct de `system_dependencies` (exécution). Un projet déclare
+  un **besoin logique** (`{"id": "openssl", "required": true}`) ; morfDeploy le
+  mappe au paquet selon la plateforme via un **registre central** (`builddeps.py`
+  : openssl→libssl-dev, libssh2→libssh2-1-dev, nlohmann-json→nlohmann-json3-dev,
+  zlib→zlib1g-dev…) et le résout **AVANT le build**. Nouvelle action
+  `service.py build-deps` (`--list` JSON, `--dry-run`, `--yes`), et résolution
+  intégrée à `install` avant `ensure_binary`.
+  - Un OpenSSL manquant s'arrête avec un message clair, pas une erreur
+    `find_package` en plein build.
+  - **Sur une toolchain sans gestionnaire de paquets** (Qt officielle sous
+    Windows) : morfDeploy **annonce** le besoin et laisse le `find_package` du
+    build comme dernier mot, sans bloquer un build qui pourrait réussir (la lib
+    peut être présente d'une façon qu'il ne détecte pas). Filet, pas mécanisme
+    principal (§ « annoncer si aucune méthode fiable »).
+  - Sur une plateforme avec gestionnaire (Debian) : détecte, présente, installe
+    (avec validation / `--yes`), vérifie. Jamais silencieux, jamais de mise à
+    niveau globale.
+
+## [0.8.0] - 2026-08-18
+
+### Corrigé
+
+- **`build_as_user` (Windows) s'adapte à la toolchain réellement présente.** Le
+  preset `mingw` fige les chemins MSYS2 d'une machine (`ninja`, `g++`, préfixe
+  Qt) ; sur un autre poste (toolchain Qt officielle sous `C:/Qt`, MSYS2 absent)
+  ces chemins n'existent pas et la compilation échoue (`ninja.exe … no such
+  file`). Le backend détecte désormais ninja, le compilateur MinGW et le préfixe
+  Qt sur le PATH/env et **surcharge** les valeurs figées par des `-D`, comme le
+  fait déjà `morf build`. Passage en forme liste (plus de `shell=True`), donc
+  aucun souci de quoting sur des chemins à espaces. Amélioration pure : si rien
+  n'est détecté, la compilation retombe sur les valeurs du preset.
+
 ## [0.7.0] - 2026-08-18
 
 ### Ajouté

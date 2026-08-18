@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.7.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.9.0-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -146,11 +146,40 @@ terminal il demande ; en non-interactif, `--yes` l'autorise (jamais en silence).
 ou une dépendance sans paquet déclaré pour elle, est signalée honnêtement plutôt
 que devinée.
 
+## Dépendances de build
+
+Distinctes des dépendances système (nécessaires pour *exécuter* un service), ce
+sont les bibliothèques nécessaires pour *compiler* un projet -- ce qu'un
+`find_package` cherche. Le projet déclare un **id logique** ; morfDeploy le mappe
+au paquet selon la plateforme (registre central : `openssl` → `libssl-dev`,
+`libssh2` → `libssh2-1-dev`, …) et le résout **avant** le build : un OpenSSL
+manquant devient un arrêt clair plutôt qu'une erreur `find_package` quinze projets
+plus loin.
+
+```jsonc
+"build_dependencies": [
+  { "id": "openssl", "required": true },
+  { "id": "libssh2", "required": true }
+]
+```
+
+```sh
+./service.py build-deps --list      # JSON : deps de build déclarées + présent/manquant
+./service.py build-deps --dry-run   # montre ce qui serait installé, ne change rien
+sudo ./service.py build-deps --yes  # installe les libs de build manquantes, vérifie
+```
+
+`install` le lance avant de compiler. Sur une plateforme avec gestionnaire de
+paquets (Debian), il détecte, présente et installe (avec confirmation, jamais en
+silence). Sur une toolchain **sans** gestionnaire (Qt officielle sous Windows), il
+**annonce** les besoins et laisse le `find_package` du build comme dernier mot,
+sans bloquer un build qui pourrait réussir.
+
 ## Organisation
 
 ```
 morfdeploy/
-├── cli.py            point d'entrée (install/update/uninstall/purge/deps/status/config)
+├── cli.py            point d'entrée (install/update/uninstall/purge/deps/build-deps/status/config)
 ├── core.py           le Deployer : les quatre étapes, indépendantes de la plateforme
 ├── manifest.py       lit et valide service.json
 ├── configmerge.py    complétion non destructive de la config (ajoute les clés manquantes, ne modifie jamais les valeurs)

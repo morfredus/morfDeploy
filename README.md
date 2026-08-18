@@ -2,7 +2,7 @@
 
 *Read in another language: **English** (this document) · [Français](README.fr.md).*
 
-[![Version](https://img.shields.io/badge/version-0.7.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.9.0-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -137,11 +137,40 @@ error; a missing optional one only warns. On a terminal it asks; non-interactive
 platform with no supported package manager, or a dependency with no package
 declared for it, is reported honestly rather than guessed.
 
+## Build dependencies
+
+Distinct from system dependencies (which a service needs to *run*), these are the
+libraries a project needs to *compile* -- what a `find_package` looks for. A
+project declares a **logical id**; morfDeploy maps it to the package per platform
+(a central registry: `openssl` -> `libssl-dev`, `libssh2` -> `libssh2-1-dev`, …)
+and resolves it **before** the build, so a missing OpenSSL is a clear stop rather
+than a `find_package` failure fifteen projects deep.
+
+```jsonc
+"build_dependencies": [
+  { "id": "openssl", "required": true },
+  { "id": "libssh2", "required": true }
+]
+```
+
+```sh
+./service.py build-deps --list      # JSON: declared build deps + present/missing
+./service.py build-deps --dry-run   # show what would be installed, change nothing
+sudo ./service.py build-deps --yes  # install the missing build libraries, verify
+```
+
+`install` runs this before compiling. On a platform with a package manager
+(Debian) it detects, presents and installs (with confirmation, never silently).
+On a toolchain with **no** package manager (the official Qt MinGW on Windows) it
+**announces** the needs and lets the build's own `find_package` be the last word,
+never blocking a build that might succeed with a library present in a way it
+cannot detect.
+
 ## Layout
 
 ```
 morfdeploy/
-├── cli.py            command-line entry point (install/update/uninstall/purge/deps/status/config)
+├── cli.py            command-line entry point (install/update/uninstall/purge/deps/build-deps/status/config)
 ├── core.py           the Deployer: the four steps, platform-agnostic
 ├── manifest.py       reads and validates service.json
 ├── configmerge.py    non-destructive config completion (adds missing keys, never edits values)
