@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.5.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.0-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -80,6 +80,18 @@ au lieu de le deviner.
   "from_config": "vault_root", "base": "state", "paths": ["vault"] }
 ```
 
+Par défaut la valeur de config EST la cible (`from_config_kind: "path"`). Quand la
+clé nomme un *dossier parent* contenant des fichiers nommés (un dossier de cache
+avec un fichier par historique), utiliser `from_config_kind: "dir"` : les `paths`
+sont joints à la valeur, et `default_dir` donne le dossier de repli sous `base`
+quand la clé est absente.
+
+```jsonc
+{ "id": "sitewatch-history", "label": "Historique SiteWatch", "destructive": true,
+  "type": "path", "from_config": "sitewatch_cache_dir", "from_config_kind": "dir",
+  "base": "app", "default_dir": "cache", "paths": ["sitewatch-history.sqlite"] }
+```
+
 ```sh
 sudo ./service.py purge cache database   # catégories nommées
 sudo ./service.py purge --all            # toutes les catégories déclarées
@@ -99,11 +111,46 @@ ou passer `--force` pour outrepasser le garde-fou. `uninstall` accepte aussi
 `--dry-run`, qui liste ce qu'il désinscrirait et (avec `--purge`) supprimerait,
 sans rien toucher.
 
+## Dépendances système
+
+Un projet déclare les paquets système dont il a besoin comme des **besoins**, pas
+comme des commandes d'installation. morfDeploy détecte le gestionnaire de paquets
+de la plateforme et résout le bon paquet ; rien de global n'est jamais touché,
+uniquement les paquets déclarés.
+
+```jsonc
+"system_dependencies": [
+  { "id": "qt-serialport", "label": "Qt SerialPort", "required_for": ["ld2410c"],
+    "packages": { "debian": ["libqt6serialport6-dev"] }, "required": false }
+]
+```
+
+`required: false` = capacité **optionnelle** : son absence désactive cette
+capacité (driver radar de morfSensor, exiftool de morfPhoto) sans bloquer le
+reste. `required: true` interrompt l'opération tant qu'elle n'est pas satisfaite.
+
+Le cycle est **détecter → présenter → valider → installer → vérifier**, jamais
+d'installation silencieuse :
+
+```sh
+./service.py deps --list        # JSON : deps déclarées + présent/manquant (découverte)
+./service.py deps --dry-run     # montre ce qui serait installé, ne change rien
+sudo ./service.py deps --yes    # installe les paquets déclarés manquants, puis vérifie
+```
+
+`install` (et `deploy`) lance la même résolution avant le build : un paquet
+obligatoire manquant s'arrête là avec un message clair plutôt qu'une erreur de
+build obscure ; un optionnel manquant se contente d'un avertissement. Sur un
+terminal il demande ; en non-interactif, `--yes` l'autorise (jamais en silence).
+`--dry-run` affiche le plan. Une plateforme sans gestionnaire de paquets supporté,
+ou une dépendance sans paquet déclaré pour elle, est signalée honnêtement plutôt
+que devinée.
+
 ## Organisation
 
 ```
 morfdeploy/
-├── cli.py            point d'entrée (install/update/uninstall/purge/status/config)
+├── cli.py            point d'entrée (install/update/uninstall/purge/deps/status/config)
 ├── core.py           le Deployer : les quatre étapes, indépendantes de la plateforme
 ├── manifest.py       lit et valide service.json
 ├── configmerge.py    complétion non destructive de la config (ajoute les clés manquantes, ne modifie jamais les valeurs)

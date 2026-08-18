@@ -3,6 +3,40 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.7.0] - 2026-08-18
+
+### Ajouté
+
+- **Gestion déclarative des dépendances système** (nouveau chantier). Un projet
+  déclare `system_dependencies` dans `service.json` (id, label, `required_for`,
+  `packages` par famille, `required`) comme des **besoins**, pas des commandes.
+  morfDeploy détecte la plateforme et le gestionnaire (`apt`/`dnf`/`pacman`),
+  résout le paquet, et suit le cycle **détecter → présenter → valider →
+  installer → vérifier**. Nouveau module `sysdeps.py` + action `service.py deps`
+  (`--list` découverte JSON, `--dry-run` plan, `--yes` autorisation).
+  - **Jamais d'installation silencieuse** : interactif → demande ; non-interactif
+    → `--yes` requis ; `--dry-run` → plan sans rien changer ; jamais de `apt
+    upgrade` global (seuls les paquets déclarés).
+  - **Obligatoire vs optionnel** : un `required` manquant interrompt proprement ;
+    un optionnel manquant se contente d'un avis et n'empêche rien.
+  - **`install`/`deploy`** résolvent les dépendances **avant le build** (un
+    paquet obligatoire manquant s'arrête là, pas en erreur de build obscure).
+  - **Portabilité** : le projet déclare le besoin, morfDeploy résout selon la
+    plateforme. Une plateforme sans gestionnaire supporté, ou une dép. sans
+    paquet pour elle, est signalée sans deviner. `install` gagne `--yes`.
+
+## [0.6.0] - 2026-08-18
+
+### Ajouté
+
+- **`from_config_kind: "dir"` + `default_dir`** sur une catégorie de purge `path`.
+  Quand la clé de config nomme un **dossier parent** (un cache contenant un
+  fichier par historique) plutôt que la donnée elle-même, `dir` joint les `paths`
+  à la valeur lue, et `default_dir` fournit le dossier de repli sous `base` si la
+  clé est absente. `from_config_kind: "path"` (défaut) conserve le comportement
+  « la valeur EST la cible ». Permet à morfAnalytics de déclarer proprement son
+  historique SiteWatch (`sitewatch_cache_dir`, défaut app/cache).
+
 ## [0.5.0] - 2026-08-17
 
 ### Ajouté

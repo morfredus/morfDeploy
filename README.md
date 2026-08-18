@@ -2,7 +2,7 @@
 
 *Read in another language: **English** (this document) · [Français](README.fr.md).*
 
-[![Version](https://img.shields.io/badge/version-0.5.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.7.0-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -76,6 +76,17 @@ reads the real location from the service's own config rather than guessing it.
   "from_config": "vault_root", "base": "state", "paths": ["vault"] }
 ```
 
+By default the config value IS the target (`from_config_kind: "path"`). When the
+key names a *parent directory* holding named files (a cache dir with one file per
+history), set `from_config_kind: "dir"`: `paths` are joined onto the value, and
+`default_dir` gives the fallback directory under `base` when the key is unset.
+
+```jsonc
+{ "id": "sitewatch-history", "label": "SiteWatch history", "destructive": true,
+  "type": "path", "from_config": "sitewatch_cache_dir", "from_config_kind": "dir",
+  "base": "app", "default_dir": "cache", "paths": ["sitewatch-history.sqlite"] }
+```
+
 ```sh
 sudo ./service.py purge cache database   # named categories
 sudo ./service.py purge --all            # every declared category
@@ -93,11 +104,44 @@ may be mid-write to would corrupt it. Stop the service first, or pass `--force`
 to override the guard. `uninstall` also takes `--dry-run`, listing what it would
 deregister and (with `--purge`) remove, without touching anything.
 
+## System dependencies
+
+A project declares the system packages it needs as **needs**, not as install
+commands. morfDeploy detects the platform's package manager and resolves the
+right package; nothing global is ever touched -- only the declared packages.
+
+```jsonc
+"system_dependencies": [
+  { "id": "qt-serialport", "label": "Qt SerialPort", "required_for": ["ld2410c"],
+    "packages": { "debian": ["libqt6serialport6-dev"] }, "required": false }
+]
+```
+
+`required: false` is an **optional** capability: its absence disables that
+capability (morfSensor's radar driver, morfPhoto's exiftool) but never blocks the
+rest. `required: true` stops the operation until it is satisfied.
+
+The cycle is **detect → present → validate → install → verify**, and it never
+installs silently:
+
+```sh
+./service.py deps --list        # JSON: declared deps + present/missing (discovery)
+./service.py deps --dry-run     # show what would be installed, change nothing
+sudo ./service.py deps --yes    # install the missing declared packages, then verify
+```
+
+`install` (and `deploy`) runs the same resolution before the build: a missing
+required package stops there with a clear message rather than as a cryptic build
+error; a missing optional one only warns. On a terminal it asks; non-interactive,
+`--yes` authorises it (never silent without it). `--dry-run` shows the plan. A
+platform with no supported package manager, or a dependency with no package
+declared for it, is reported honestly rather than guessed.
+
 ## Layout
 
 ```
 morfdeploy/
-├── cli.py            command-line entry point (install/update/uninstall/purge/status/config)
+├── cli.py            command-line entry point (install/update/uninstall/purge/deps/status/config)
 ├── core.py           the Deployer: the four steps, platform-agnostic
 ├── manifest.py       reads and validates service.json
 ├── configmerge.py    non-destructive config completion (adds missing keys, never edits values)
