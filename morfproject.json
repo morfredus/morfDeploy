@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "project": { "id": "morfDeploy", "type": "tool" },
+  "packaging": { "provider": "none", "targets": {} }
+}

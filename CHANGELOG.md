@@ -3,6 +3,114 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.14.0] - 2026-08-19
+
+### Ajouté
+
+- **Action `package`** (Phase 2) : produit le(s) livrable(s) de la plateforme
+  courante à partir d'un binaire **prouvé**. Piloté par `morfproject.json`
+  (targets) + `service.json` (manifeste).
+  - Ne package que les targets `morfdeploy` **natives** (os+arch) ; les autres
+    sont signalées et ignorées (aucune compilation croisée supposée). `--target`
+    force une target native ; `--no-build` réutilise le binaire existant.
+  - **Barrière de provenance** (`build-info.json`) : refus si absent, si
+    `dirty` != `false` (true **ou** null), si le commit ≠ `HEAD`, si la version ≠
+    `VERSION`, ou si plateforme/arch ≠ cible. **Jamais** de repli sur un ancien
+    binaire après échec de build.
+  - **`.deb`** : arbo `/opt` `/etc` `/var/lib` `/lib/systemd/system/<svc>.service`
+    (unité du projet, placeholders résolus) ; `Depends` = **union triée** de
+    `dpkg-shlibdeps` (libs liées du binaire) et du **runtime explicite**, les deux
+    origines **affichées séparément** avant fusion, jamais de paquet `-dev` ;
+    configs en `conffiles` (préservées à l'upgrade) ; `postinst`/`prerm`
+    (utilisateur dédié + `systemctl enable/disable`).
+  - **`.zip`** (Windows) : bundle windeployqt + config + `install-service.ps1` /
+    `uninstall-service.ps1` (tâche planifiée SYSTEM). **Vérifié** de bout en bout.
+- **Build mutualisé** : plusieurs targets partageant le même preset ne compilent
+  qu'une fois.
+
+### Modifié
+
+- **Architecture de provenance normalisée** : `detect_platform_arch` renvoie
+  `x86_64` (et non `amd64`) sous Linux x64, pour coïncider avec `platform.arch`
+  des targets ; le nom Debian (`amd64`) reste dans `package.architecture`.
+
+## [0.13.1] - 2026-08-19
+
+### Corrigé
+
+- **Validation du format `{build, runtime}`** dans `_parse_system_deps` : la
+  0.13.0 exposait les accesseurs build/runtime mais la validation au chargement
+  rejetait encore une famille déclarée en objet (« lists no package »). Elle
+  accepte désormais la liste plate héritée **et** `{build, runtime}` (l'un des
+  deux non vide suffit - `exiftool` est runtime-only), en conservant la forme.
+
+## [0.13.0] - 2026-08-19
+
+### Ajouté
+
+- **Séparation build/runtime des dépendances système** (préparation du `Depends`
+  d'un `.deb`, Phase 2). `SystemDependency` accepte, par famille, soit la liste
+  plate historique (interprétée comme **build**), soit `{ "build": [...],
+  "runtime": [...] }`. Nouveaux accesseurs `build_packages(family)` /
+  `runtime_packages(family)`. `sysdeps.resolve()` (vérification **avant**
+  compilation) n'utilise que **build** ; le **runtime** alimentera le `Depends`
+  du paquet, jamais déduit d'un nom `-dev`. Un besoin runtime doit être déclaré
+  explicitement (la liste plate héritée n'en déclare aucun).
+
+## [0.12.0] - 2026-08-19
+
+### Ajouté
+
+- **Lecteur `morfproject.json` autonome** (`morfdeploy/morfproject.py`, schéma
+  v1) - fondation de la Phase 2 (`package`). morfdeploy lit lui-même ce dont il
+  est consommateur (schéma, `project.id`/`type`, provider par défaut, targets avec
+  `platform`, `build.preset`, `package.format` et override de provider), sans
+  dépendre de morfTools. Rejette une `schema_version` inconnue, normalise les
+  architectures (`x86_64`/`arm64`), erreurs explicites nommant le champ fautif.
+  Même contrat observable que le lecteur de morfTools (copies vendorées séparées,
+  contrat identique).
+
+## [0.11.0] - 2026-08-19
+
+### Ajouté
+
+- **Action `build-info`** : écrit `build-info.json` à côté du binaire déjà
+  compilé, **sans compiler**. Localise l'artefact par la convention autoritaire de
+  morfdeploy (`locate_binary`) puis appelle le helper de provenance. C'est le
+  point d'appui de `morf build` pour marquer un service après compilation :
+  l'orchestrateur n'a **aucune heuristique de localisation** propre, la seule
+  source de vérité du layout de build reste morfdeploy. Manifeste seul (aucun
+  backend, aucun privilège) ; échoue clairement si aucun binaire n'est présent.
+
+## [0.10.1] - 2026-08-19
+
+### Modifié
+
+- **`build-info.json` conserve le SHA Git complet.** `commit` porte désormais le
+  SHA entier (l'identifiant de provenance et la clé de détection de conflit) ; le
+  hash court reste disponible sous `commit_short`, pour l'affichage. Deux builds
+  peuvent partager un préfixe court : la comparaison doit porter sur le SHA entier.
+
+## [0.10.0] - 2026-08-19
+
+### Ajouté
+
+- **Provenance de build (`build-info.json`)** — première pierre du chantier de
+  packaging. Un helper partagé `provenance.write_build_info(...)` écrit, **après
+  un build réussi et à côté de l'artefact**, un `build-info.json` : projet,
+  version (lue du `VERSION`), **commit** court, **dirty** (état réel des sources),
+  plateforme et architecture **détectées** en noms de cibles canoniques
+  (`windows-x86_64`, `linux-amd64`, `linux-arm64`), preset, nom d'artefact et date
+  UTC. `Deployer.ensure_binary` l'appelle automatiquement, **uniquement dans la
+  branche qui compile réellement** (jamais quand le binaire était déjà là).
+  - La provenance concerne **ce binaire précis** : le fichier est déposé à côté
+    de l'artefact, pas seulement dans le dossier de build.
+  - `dirty` reste `null` si git n'a pas pu être interrogé — un état inconnu, jamais
+    confondu avec « propre ».
+  - Ce module **écrit** ; la future chaîne de distribution ne fera que **lire** et
+    ne régénérera jamais ce fichier. Un binaire sans provenance, ou dont le commit
+    diverge de `HEAD`, sera traité comme non prouvé par le packaging.
+
 ## [0.9.0] - 2026-08-18
 
 ### Ajouté
