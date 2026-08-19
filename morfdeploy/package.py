@@ -131,7 +131,14 @@ def select_targets(project, target_name, cur_os, cur_arch):
 
 def build_preset(repo_root: Path, preset: str) -> None:
     """Configure and build a preset, or stop. No fall-back on failure."""
-    for stage in (["cmake", "--preset", preset],
+    overrides = []
+    if platform.system() == "Windows" and preset in ("mingw", "windows"):
+        # Packaging builds must receive the same portable toolchain discovery as
+        # ordinary service builds. Otherwise a preset sees Qt but misses OpenSSL
+        # and other libraries installed beside the detected MinGW compiler.
+        from .backends.windows import _mingw_toolchain_overrides
+        overrides = _mingw_toolchain_overrides()
+    for stage in (["cmake", "--preset", preset, *overrides],
                   ["cmake", "--build", "--preset", preset]):
         result = subprocess.run(stage, cwd=str(repo_root), check=False)
         if result.returncode != 0:

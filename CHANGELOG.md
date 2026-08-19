@@ -3,6 +3,14 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.15.0] - 2026-08-20
+
+### Corrigé
+
+- Le packaging Windows utilise maintenant la même détection portable de
+  toolchain que les builds de service. La racine OpenSSL est déduite de
+  `openssl` présent dans le PATH, sans chemin MSYS2 figé.
+
 ## [0.14.0] - 2026-08-19
 
 ### Ajouté
