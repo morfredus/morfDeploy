@@ -3,6 +3,15 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.17.1] - 2026-08-20
+
+### Corrigé
+
+- Une installation ou une mise à jour lancée depuis le clone installe aussi le
+  `helper_binary` Linux déclaré par le service, avec les mêmes permissions
+  restreintes que le paquet Debian. Un agent installé ainsi peut donc effectuer
+  son action privilégiée sans étape manuelle supplémentaire.
+
 ## [0.17.0] - 2026-08-20
 
 ### Ajouté
