@@ -1,7 +1,16 @@
 # Journal des versions - morfDeploy
 
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
-et du [versionnage sémantique](https://semver.org/lang/fr/).
+et du [versionnage sémantique](https://semver.org/lang/fr/). 
+
+## [0.17.0] - 2026-08-20
+
+### Ajouté
+
+- Un service peut déclarer un `helper_binary` Linux. Le paquet Debian le place
+  hors du répertoire applicatif, root-owned et exécutable seulement par le
+  compte de service : une API non privilégiée peut ainsi déléguer une action
+  strictement définie sans devenir root.
 
 ## [0.16.0] - 2026-08-20
 
