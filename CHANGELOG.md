@@ -3,6 +3,14 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.16.0] - 2026-08-20
+
+### Corrigé
+
+- Le packaging Windows reconnaît les exécutables MinGW qui ne dépendent pas de
+  Qt. Leur passage attendu dans `windeployqt` ne bloque plus la création de
+  l'archive et les DLL de toolchain restent collectées.
+
 ## [0.15.0] - 2026-08-20
 
 ### Corrigé
