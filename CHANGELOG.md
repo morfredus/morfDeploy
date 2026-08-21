@@ -3,6 +3,14 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.17.3] - 2026-08-21
+
+### Corrigé
+
+- Sur MinGW, le packaging passe a CMake les chemins OpenSSL explicites
+  (include + `libcrypto.dll.a` / `libssl.dll.a`) et ajoute le prefix MSYS2 a
+  `CMAKE_PREFIX_PATH`. FindOpenSSL survit a un reset de cache.
+
 ## [0.17.2] - 2026-08-21
 
 ### Corrigé
