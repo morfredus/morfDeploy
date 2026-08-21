@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.17.1-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.17.2-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -40,6 +40,10 @@ sudo ./service.py uninstall    # désinscrit, en conservant la configuration
 sudo ./service.py purge <id>…  # efface des catégories de données (voir plus bas)
 ./service.py status            # ce que le système en dit
 ```
+
+La durée signalée à morfAnalytics (domaine Monitor) est celle du vrai ninja :
+du premier fichier compilé jusqu'à la fin. Un `cmake --build` déjà à jour n'est
+plus annoncé comme une compile d'une seconde.
 
 ## Purge des données
 

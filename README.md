@@ -2,7 +2,7 @@
 
 *Read in another language: **English** (this document) · [Français](README.fr.md).*
 
-[![Version](https://img.shields.io/badge/version-0.17.1-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.17.2-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -38,6 +38,10 @@ sudo ./service.py uninstall    # deregister, keeping the configuration
 sudo ./service.py purge <id>…  # erase declared data categories (see below)
 ./service.py status            # what the system says about it
 ```
+
+Compile duration sent to morfAnalytics (Monitor) is the real ninja wall time,
+from the first compiled file to link. A no-op `cmake --build` is no longer
+reported as a one-second compile.
 
 ## Purging data
 

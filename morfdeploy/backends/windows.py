@@ -37,7 +37,7 @@ import subprocess
 import time
 from pathlib import Path
 
-from ..activity import emit_build_activity
+from ..activity import complete_build_activity
 from ..manifest import Manifest
 from .base import ServiceBackend
 
@@ -495,7 +495,7 @@ class WindowsBackend(ServiceBackend):
                            cwd=repo_root, check=True)
             ok = True
         finally:
-            emit_build_activity(repo_root, preset, start, time.time(), ok)
+            complete_build_activity(repo_root, preset, start, ok)
 
     # -- Internals --------------------------------------------------------
 

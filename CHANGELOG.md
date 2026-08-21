@@ -3,6 +3,15 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.17.2] - 2026-08-21
+
+### Corrigé
+
+- La durée envoyée à morfAnalytics mesure le vrai travail de compilation
+  (premier compilateur jusqu'à la fin), plus un `cmake --build` déjà à jour
+  d'une seconde. Les allers-retours sans fichier à recompiler ne sont plus
+  signalés. `duration_s` est calculé sur des horodatages flottants.
+
 ## [0.17.1] - 2026-08-20
 
 ### Corrigé
