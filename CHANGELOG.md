@@ -3,6 +3,12 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.17.4] - 2026-08-21
+
+### Corrigé
+
+- Installation du helper privilégié : le dossier /usr/lib/morfsystem/<service> reçoit le groupe du compte de service (comme le fichier) pour rester traversable. Il restait en root:root 0750, rendant un helper pourtant bien installé « introuvable » à l'exécution par le service non privilégié.
+
 ## [0.17.3] - 2026-08-21
 
 ### Corrigé

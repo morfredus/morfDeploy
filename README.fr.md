@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.17.3-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.17.4-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -125,7 +125,7 @@ uniquement les paquets déclarés.
 ```jsonc
 "system_dependencies": [
   { "id": "qt-serialport", "label": "Qt SerialPort", "required_for": ["ld2410c"],
-    "packages": { "debian": ["libqt6serialport6-dev"] }, "required": false }
+    "packages": { "debian": ["qt6-serialport-dev"] }, "required": false }
 ]
 ```
 
