@@ -3,6 +3,14 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.17.7] - 2026-08-23
+
+### Corrigé
+
+- Empaquetage : si `build-info.json` n'est pas inscriptible (dossier de build
+  resté `root` après un cmake en sudo), tamponnage dans un répertoire temporaire
+  au lieu d'un `PermissionError` qui abandonne le `.deb`.
+
 ## [0.17.6] - 2026-08-23
 
 ### Corrigé
