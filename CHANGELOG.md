@@ -3,6 +3,14 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.17.6] - 2026-08-23
+
+### Corrigé
+
+- `prerm` : à l'upgrade, `systemctl stop` seulement. `disable --now` est réservé
+  à la désinstallation. Sinon un `enable --now` avalé par `|| true` laissait le
+  service désactivé (morfMonitor mis à jour depuis sa propre page).
+
 ## [0.17.5] - 2026-08-23
 
 ### Corrigé
