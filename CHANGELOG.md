@@ -3,6 +3,19 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.18.0] - 2026-08-23
+
+### Ajouté
+
+- Contrat de permissions pour les fichiers de config sous `/etc` : mode
+  déterministe posé au packaging, `0644 root:root` par défaut (plus le mode
+  hérité du checkout git, qui variait selon la machine et l'umask). Un fichier
+  `configs` du manifeste peut déclarer un `mode` restrictif (ex. `"0640"` pour un
+  secret) ; le `postinst` le redonne alors au groupe du service (`chown
+  root:<service>`) pour qu'il reste lisible par son compte non-root. Ce n'est pas
+  une règle absolue 0644 : c'est un défaut sûr, surchargeable là où un secret
+  l'exige.
+
 ## [0.17.8] - 2026-08-23
 
 ### Corrigé
