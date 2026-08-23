@@ -3,6 +3,15 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.17.8] - 2026-08-23
+
+### Corrigé
+
+- Empaquetage : `build-info.json` root dans un dossier user (cas `morf.py
+  upgrade` puis `package-all` en user). Unlink puis réécriture, sinon tampon
+  temporaire même si le dossier est inscriptible. Copie de `VERSION` sous
+  `/opt/<service>/`.
+
 ## [0.17.7] - 2026-08-23
 
 ### Corrigé
