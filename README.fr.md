@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.17.4-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.17.5-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 

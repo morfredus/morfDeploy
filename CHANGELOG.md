@@ -3,6 +3,14 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.17.5] - 2026-08-23
+
+### Corrigé
+
+- `postinst` d'un `.deb` avec helper : le dossier `/usr/lib/morfsystem/<service>`
+  est aussi `chown root:<compte>` et `chmod 750`. Sans ça, après `dpkg` le
+  binaire 4750 existait mais le service ne pouvait pas le parcourir.
+
 ## [0.17.4] - 2026-08-21
 
 ### Corrigé
