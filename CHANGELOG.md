@@ -3,6 +3,24 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.19.0] - 2026-09-03
+
+### Added
+
+- **Reproducible ARM64 cross-compilation from x86_64** (WSL/Linux), for the parc's
+  `linux-arm64-cross` CMake preset. A single canonical toolchain file
+  (`morfdeploy/cmake/linux-aarch64.cmake`, vendored into every project via
+  `sync-morf`) targets Debian Trixie arm64 with unified env vars (`MORF_SYSROOT`,
+  `MORF_CROSS_PREFIX`, `MORF_QT_HOST_PATH`) and separates host build tools from the
+  target Qt6. Qt's `moc`/`rcc`/`uic` (arm64) run under qemu-user (`QEMU_LD_PREFIX`
+  = the sysroot), so no version-matched host Qt is required.
+- `scripts/build-arm64-sysroot.sh`: builds a Debian Trixie arm64 sysroot once
+  (debootstrap + qemu-user-static + the parc's Qt6 packages), reproducible and
+  usable offline afterwards. The Raspberry Pi is never required. The native
+  `linux-arm64` build on the Pi stays the reference path; this is the cross path.
+- Validated end to end on morfPhoto: `cmake --preset linux-arm64-cross` produces an
+  `ELF 64-bit ARM aarch64` binary from x86_64 WSL.
+
 ## [0.18.0] - 2026-08-23
 
 ### Ajouté
