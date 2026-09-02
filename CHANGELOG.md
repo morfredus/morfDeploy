@@ -3,6 +3,30 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.20.1] - 2026-09-03
+
+### Fixed
+
+- **Cross packaging stamps build-info.json.** The cross path went straight to the
+  provenance barrier without stamping, so packaging refused with "no build-info.json
+  beside <binary>: provenance unknown". `_package_cross` now writes build-info beside
+  the cross binary (with the same root:root fallback as the native flow) before the
+  barrier; the ELF still supplies the architecture. A named arm64 `.deb` now builds
+  end to end from an x86_64 host.
+
+## [0.20.0] - 2026-09-03
+
+### Added
+
+- **Cross packaging** (opt-in): `package.py` can now build a linux/arm64 `.deb` from
+  an x86_64 Linux host. Naming an arm64 target (e.g. `linux-arm64-deb`) with
+  `MORF_SYSROOT` set builds via the `linux-arm64-cross` preset (build-arm64-cross),
+  proves the binary by its actual ELF architecture (build-info records the host arch
+  on a cross build), and resolves Depends against the target sysroot's dpkg database
+  (`dpkg-shlibdeps --admindir=<sysroot>/var/lib/dpkg`) so arm64 sonames map to arm64
+  packages. Strictly guarded: without a named arm64 target and MORF_SYSROOT, the
+  native packaging path is unchanged (a non-native target is still refused).
+
 ## [0.19.0] - 2026-09-03
 
 ### Added
