@@ -3,6 +3,53 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.20.5] - 2026-09-03
+
+### Changed
+
+- **Cleanup: `shlibdeps` is native-only again.** The `admindir`, `libdirs` and
+  `objdump` parameters added while iterating on cross Depends are gone: the cross
+  path resolves its dependencies from the sysroot's `.shlibs` (`cross_depends`), so
+  the native `shlibdeps` no longer needs them. No behaviour change (native calls it
+  as `shlibdeps(binary)`); presets and the native path are untouched.
+
+## [0.20.4] - 2026-09-03
+
+### Fixed
+
+- **Cross packaging resolves Depends from the sysroot's own `.shlibs`.** The previous
+  attempts still failed at the last step: `dpkg-shlibdeps` finds a library at
+  `<sysroot>/usr/lib/...` but the package database records it at `/usr/lib/...` and it
+  has no `--sysroot` to strip the prefix, so every lookup reported "no dependency
+  information found". Cross packaging now reads the binary's NEEDED sonames (target
+  objdump) and maps each to the dependency clause its providing package declares in
+  `<sysroot>/var/lib/dpkg/info/*.shlibs` (`udeb:` variants skipped, the dynamic loader
+  ignored, as dpkg does). Deterministic, and free of the sysroot path-matching
+  limitation. Native packaging keeps the plain `dpkg-shlibdeps` path, unchanged.
+
+## [0.20.3] - 2026-09-03
+
+### Fixed
+
+- **Cross packaging reads arm64 sonames with the target objdump.** `dpkg-shlibdeps`
+  reads a binary's `NEEDED` sonames via `objdump`, and the host's x86_64 binutils
+  objdump cannot parse an arm64 ELF, so it read nothing and the cross `.deb` Depends
+  stayed empty even with the sysroot lib dirs and dpkg admindir. `shlibdeps` now runs
+  it with `OBJDUMP=<cross-prefix>objdump` (e.g. `aarch64-linux-gnu-objdump`) on a
+  cross build, warns if that objdump is missing, and prints `dpkg-shlibdeps`'
+  diagnostics whenever it returns no dependency line. Native packaging unchanged.
+
+## [0.20.2] - 2026-09-03
+
+### Fixed
+
+- **Cross packaging resolves runtime Depends.** `dpkg-shlibdeps` could not find the
+  arm64 `.so` files (they live in the sysroot, off the host search path), so
+  `--ignore-missing-info` silently returned an empty dependency set and the cross
+  `.deb` declared no Qt6/glibc packages. `shlibdeps` now passes the sysroot's
+  multiarch library directories (`-l<sysroot>/usr/lib/<triplet>`, ...) so an arm64
+  binary's sonames map to the target's arm64 packages. Native packaging unchanged.
+
 ## [0.20.1] - 2026-09-03
 
 ### Fixed
