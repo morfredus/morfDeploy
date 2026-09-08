@@ -3,6 +3,21 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.20.6] - 2026-09-08
+
+### Added
+
+- **A service can declare the shared parc configuration a prerequisite, without
+  morfdeploy ever owning that file.** A new `requires_shared_config: true` in
+  `service.json` makes the install VERIFY that `/etc/morfsystem/morfsystem.json`
+  exists before it registers the unit, and refuse with an actionable message if it
+  does not (`check_shared_prerequisite`). morfdeploy never creates or copies the
+  shared file: it has a single owner, morfTools `config.py shared`. This replaces the
+  earlier, wrong approach of listing the shared file as a `configs` entry of one
+  service (morfMonitor), which both duplicated ownership and, when its source was
+  missing from a fresh clone, aborted the whole registration. The check reads the
+  file only; a service that does not set the flag installs exactly as before.
+
 ## [0.20.5] - 2026-09-03
 
 ### Changed
