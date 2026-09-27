@@ -3,6 +3,19 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.20.7] - 2026-09-27
+
+### Removed
+
+- **Dead code with no caller anywhere in the parc:** `Deployer.dependency_statuses`
+  and `Deployer.build_dependency_statuses` (the `deps` / `build-deps` actions resolve
+  their statuses inline) and the `MorfProject.is_morfdeploy` property (callers use
+  `morfdeploy_targets()`, which honours per-target overrides).
+
+### Changed
+
+- Em dashes replaced by `-` in the project's own files.
+
 ## [0.20.6] - 2026-09-08
 
 ### Added
@@ -302,7 +315,7 @@ et du [versionnage sémantique](https://semver.org/lang/fr/).
 
 ### Ajouté
 
-- **Provenance de build (`build-info.json`)** — première pierre du chantier de
+- **Provenance de build (`build-info.json`)** - première pierre du chantier de
   packaging. Un helper partagé `provenance.write_build_info(...)` écrit, **après
   un build réussi et à côté de l'artefact**, un `build-info.json` : projet,
   version (lue du `VERSION`), **commit** court, **dirty** (état réel des sources),
@@ -312,7 +325,7 @@ et du [versionnage sémantique](https://semver.org/lang/fr/).
   branche qui compile réellement** (jamais quand le binaire était déjà là).
   - La provenance concerne **ce binaire précis** : le fichier est déposé à côté
     de l'artefact, pas seulement dans le dossier de build.
-  - `dirty` reste `null` si git n'a pas pu être interrogé — un état inconnu, jamais
+  - `dirty` reste `null` si git n'a pas pu être interrogé - un état inconnu, jamais
     confondu avec « propre ».
   - Ce module **écrit** ; la future chaîne de distribution ne fera que **lire** et
     ne régénérera jamais ce fichier. Un binaire sans provenance, ou dont le commit
@@ -480,7 +493,7 @@ et du [versionnage sémantique](https://semver.org/lang/fr/).
 - **Émetteur d'événements de compilation** (`morfdeploy/activity.py`). `build_as_user`
   (backends systemd et Windows) signale désormais chaque compilation au domaine Monitor
   de morfAnalytics : projet, machine, début/fin, résultat (succès/échec), preset.
-  morfDeploy sait ce qu'il compile — source exacte des événements, rien de deviné.
+  morfDeploy sait ce qu'il compile - source exacte des événements, rien de deviné.
   **Best-effort et sans dépendance** : émis seulement si l'URL est connue, via la
   variable `MORFANALYTICS_ACTIVITY_URL` **ou** le fichier `/etc/morfsystem/monitor-activity-url`
   (robuste sous `sudo`, qui efface l'environnement). Jamais bloquant si morfAnalytics
