@@ -3,6 +3,28 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.21.0] - 2026-09-29
+
+### Changed
+
+- **`update` (and `install`) bring the config fully up to the example.** New keys now
+  reach modules the user already has (lists of objects matched by `id`, never a new
+  entry added) - until now only the explicit `config` action did it, so options such
+  as `discovery` or `morfsync_url` never reached an updated machine. Documentation
+  comments (`_comment*`) follow the example: refreshed, and dropped when the example
+  no longer has them. `merge_config` returns a `MergeReport`
+  (added / removed / obsolete / comments).
+
+### Added
+
+- **Declared retired keys: `removed_keys`** in a `configs` entry of `service.json`
+  (`a.b`, `modules[].x` for every object of a list). Update deletes them from the
+  installed file, after the usual timestamped backup, and says so (`- key`). Undeclared
+  unknown keys are still only reported (`?`), with a hint to declare them. Found on
+  morfAnalytics: `altitude_m`, retired in 0.63.0, stayed in the Pi's config.
+- `tests/test_configmerge.py`: the real case (retired key, keys inside modules,
+  user values, no new module, unknown key kept, no rewrite when up to date).
+
 ## [0.20.7] - 2026-09-27
 
 ### Removed

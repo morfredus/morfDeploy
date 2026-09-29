@@ -2,7 +2,7 @@
 
 *Read in another language: **English** (this document) · [Français](README.fr.md).*
 
-[![Version](https://img.shields.io/badge/version-0.20.7-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.21.0-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -170,6 +170,33 @@ On a toolchain with **no** package manager (the official Qt MinGW on Windows) it
 never blocking a build that might succeed with a library present in a way it
 cannot detect.
 
+## Configuration updates
+
+On every `install`, `update` or `config`, the installed configuration is brought up
+to the example the version ships (`*.example.json`), never overwriting a setting:
+
+- a **new key** is added with its default, at any depth, including **inside a module
+  already present** (matched by `id`); a missing module is never added;
+- a **set value** is kept as is;
+- **comments** (`_comment*`) follow the example (refreshed, dropped when it no longer
+  has them);
+- a key a version **retired** is deleted when the project declares it in
+  `service.json`; any other unknown key stays and is reported.
+
+```json
+"configs": [
+  {
+    "source": "config/myservice.example.json",
+    "dest": {"linux": "/etc/morfsystem/myservice/myservice.json"},
+    "removed_keys": ["modules[].old_setting"]
+  }
+]
+```
+
+`modules[].x` means key `x` in every object of list `modules`. Entries stay in the
+manifest, so a machine updated late cleans up too. A timestamped backup
+(`.bak-YYYYMMDD-HHMMSS`) precedes every write.
+
 ## Layout
 
 ```
@@ -177,7 +204,7 @@ morfdeploy/
 ├── cli.py            command-line entry point (install/update/uninstall/purge/deps/build-deps/status/config)
 ├── core.py           the Deployer: the four steps, platform-agnostic
 ├── manifest.py       reads and validates service.json
-├── configmerge.py    non-destructive config completion (adds missing keys, never edits values)
+├── configmerge.py    config upgrade (new keys, declared retired keys, never a set value)
 └── backends/
     ├── systemd.py    Linux (systemd units, StateDirectory...)
     ├── windows.py    Windows service

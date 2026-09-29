@@ -2,7 +2,7 @@
 
 *Lire dans une autre langue : [English](README.md) · **Français** (ce document).*
 
-[![Version](https://img.shields.io/badge/version-0.20.7-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.21.0-blue)](CHANGELOG.md)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL--3.0--only-blue)
 
@@ -179,6 +179,35 @@ silence). Sur une toolchain **sans** gestionnaire (Qt officielle sous Windows), 
 **annonce** les besoins et laisse le `find_package` du build comme dernier mot,
 sans bloquer un build qui pourrait réussir.
 
+## Mise à jour de la configuration
+
+À chaque `install`, `update` ou `config`, la configuration installée est remise au
+niveau de l'exemple livré par la version (`*.example.json`), sans jamais écraser un
+réglage :
+
+- une **clé nouvelle** est ajoutée avec sa valeur par défaut, à toute profondeur, y
+  compris **dans un module déjà présent** (apparié par son `id`) ; un module absent
+  n'est jamais ajouté ;
+- une **valeur réglée** est conservée telle quelle ;
+- les **commentaires** `_comment*` suivent l'exemple (rafraîchis, retirés s'il ne les
+  porte plus) ;
+- une **clé retirée** par une version est supprimée si le projet la déclare dans
+  `service.json` ; toute autre clé inconnue reste en place et est signalée.
+
+```json
+"configs": [
+  {
+    "source": "config/monservice.example.json",
+    "dest": {"linux": "/etc/morfsystem/monservice/monservice.json"},
+    "removed_keys": ["modules[].ancien_parametre"]
+  }
+]
+```
+
+`modules[].x` désigne la clé `x` dans chaque objet de la liste `modules`. Les
+entrées restent dans le manifeste : une machine mise à jour en retard se nettoie
+aussi. Une sauvegarde horodatée (`.bak-AAAAMMJJ-HHMMSS`) précède toute écriture.
+
 ## Organisation
 
 ```
@@ -186,7 +215,7 @@ morfdeploy/
 ├── cli.py            point d'entrée (install/update/uninstall/purge/deps/build-deps/status/config)
 ├── core.py           le Deployer : les quatre étapes, indépendantes de la plateforme
 ├── manifest.py       lit et valide service.json
-├── configmerge.py    complétion non destructive de la config (ajoute les clés manquantes, ne modifie jamais les valeurs)
+├── configmerge.py    mise à niveau de la config (clés nouvelles, clés retirées déclarées, jamais une valeur réglée)
 └── backends/
     ├── systemd.py    Linux (unités systemd, StateDirectory...)
     ├── windows.py    service Windows
