@@ -3,6 +3,22 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.21.2] - 2026-10-10
+
+### Fixed
+
+- **`config push` no longer writes a useless backup**: a deployed config already identical to
+  the repository's copy is left alone (no `.bak-*`, no replacement, no restart). Before, every
+  push left a copy identical to the live file.
+
+## [0.21.1] - 2026-10-10
+
+### Fixed
+
+- **`install` and `update` now copy `VERSION` next to the binary** (mode 644, owned by the
+  service account). Only the `.deb` path did, so a service deployed from its clone kept a stale
+  `/opt/<service>/VERSION` (pi4fred: morfAnalytics read 0.36.1 while 0.69.x was running).
+
 ## [0.21.0] - 2026-09-29
 
 ### Changed
