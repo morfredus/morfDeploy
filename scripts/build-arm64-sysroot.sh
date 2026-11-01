@@ -40,7 +40,7 @@ SYSROOT="${1:-$HOME/morf-sysroots/trixie-arm64}"
 # (qt6-base/charts/tools + deps courantes du parc). Ajouter ici tout -dev arm64 dont
 # un service a besoin (ex. libqt6serialport6-dev pour morfSensor).
 PKGS="qt6-base-dev,qt6-charts-dev,qt6-tools-dev,qt6-tools-dev-tools,qt6-serialport-dev,\
-libssl-dev,libssh2-1-dev,zlib1g-dev,nlohmann-json3-dev,pkg-config"
+libssl-dev,libssh2-1-dev,libsqlite3-dev,zlib1g-dev,nlohmann-json3-dev,pkg-config"
 
 info()  { printf '\033[36m%s\033[0m\n' "$*"; }
 warn()  { printf '\033[33m%s\033[0m\n' "$*" >&2; }

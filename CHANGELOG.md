@@ -3,6 +3,15 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [Unreleased]
+
+### Fixed
+
+- **`build-arm64-sysroot.sh` installs `libsqlite3-dev`** in the arm64 sysroot. Without it the
+  arm64 cross-build of ComponentHub stopped at configure ("Could NOT find SQLite3"). An
+  existing sysroot gets it with
+  `sudo chroot ~/morf-sysroots/trixie-arm64 apt-get install -y libsqlite3-dev`.
+
 ## [0.21.2] - 2026-10-10
 
 ### Fixed
