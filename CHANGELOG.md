@@ -3,6 +3,17 @@
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et du [versionnage sémantique](https://semver.org/lang/fr/). 
 
+## [0.22.0] - 2026-11-17
+
+### Added
+
+- Build dependencies on Windows with MSYS2: `detect_build_package_manager()` recognises MSYS2 from the compiler on the `PATH` (`msys2-ucrt64`, or the deprecated `msys2-mingw64`) and maps openssl, libssh2, nlohmann-json and zlib to the `mingw-w64-ucrt-x86_64-*` (or `mingw-w64-x86_64-*`) packages. The libraries are verified with the pacman of that MSYS2 and, when one is missing, the exact `pacman -S --needed ...` command is printed. The build never installs anything there, and CMake's own `find_package` keeps the last word. The official Qt toolchain is still reported as having no package manager.
+- `tests/test_msys2_builddeps.py`.
+
+### Changed
+
+- Runtime system dependencies are unchanged on Windows: the MSYS2 detection is a separate function used only for build libraries.
+
 ## [Unreleased]
 
 ### Fixed
